@@ -5,3 +5,4 @@ psycopg2-binary
 Flask-RESTful
 Flask-Bcrypt
 python-dotenv
+Flask-JWT-Extended
