@@ -8,6 +8,11 @@ persons_bp = Blueprint('persons_bp', __name__)
 @jwt_required
 def create_person():
     data = request.json
+    current_user_id = get_jwt_identity()
+    if current_user_id != data['create_by_user_id']:
+        return jsonify({
+            'message':'Invalid user'
+        }), 403
     person = Persons(
         chinese_name = data.get('chinese_name'),
         latin_name = data.get('latin_name'),
@@ -20,7 +25,7 @@ def create_person():
         profile_photo_url = data.get('profile_photo_url'),
         note = data.get('note'),
         visibility = data.get('visibility').
-        create_by_user_id = data.get('create_by_user_id')                          
+        create_by_user_id = current_user_id                        
     )
     db.session.add(person)
     db.session.commit()

@@ -7,7 +7,13 @@ relations_bp = Blueprint('relations_bp', __name__)
 @relations_bp.route('/', methods=['POST'])
 @jwt_required
 def create_relationship():
+    current_user_id = get_jwt_identity()
     data = request.json
+
+    if current_user_id != data['created_by_user_id']:
+        return jsonify({
+            'message':'Invalid user'
+        }), 403
 
     from_id = data['from_person_id']
     to_id = data['to_person_id']
@@ -62,8 +68,8 @@ def create_relationship():
         end_date = data.get('end_date'),
         verified = data.get('verified'),
         notes = data.get('notes'),
-        create_by_user_id = data.get('create_by_user_id'),
-        update_by_user_id = data.get('update_by_user_id')
+        create_by_user_id = current_user_id,
+        update_by_user_id = current_user_id
     )
     db.session.add(relationship)
     db.session.commit()
@@ -75,21 +81,28 @@ def create_relationship():
 @relations_bp.route('/<rel_id>', methods=['GET'])
 @jwt_required
 def get_relationship(rel_id):
+    current_user_id = get_jwt_identity()
     rel = Relationship.query.get_or_404(rel_id)
-    return jsonify({
-        'id': rel.id,
-        'from_person_id': rel.from_person_id,
-        'to_person_id': rel.to_person_id,
-        'relationship_type': rel.relationship_type,
-        'is_adopted': rel.is_adopted,
-        'start_date': rel.start_date,
-        'end_date': rel.end_date,
-        'verified': rel.verified,
-        'confidence': rel.confidence,
-        'visibility': rel.visibility,
-        'notes': rel.notes,
-        'created_by_user_id': rel.created_by_user_id,
-        'created_at': rel.created_at,
-        'updated_by_user_id': rel.updated_by_user_id,
-        'updated_at': rel.updated_at,
-    }), 200
+
+    if current_user_id != rel['created_by_user_id']:
+        return jsonify({
+            'message':'Invalid user'
+    }), 403
+    else:
+        return jsonify({
+            'id': rel.id,
+            'from_person_id': rel.from_person_id,
+            'to_person_id': rel.to_person_id,
+            'relationship_type': rel.relationship_type,
+            'is_adopted': rel.is_adopted,
+            'start_date': rel.start_date,
+            'end_date': rel.end_date,
+            'verified': rel.verified,
+            'confidence': rel.confidence,
+            'visibility': rel.visibility,
+            'notes': rel.notes,
+            'created_by_user_id': rel.created_by_user_id,
+            'created_at': rel.created_at,
+            'updated_by_user_id': rel.updated_by_user_id,
+            'updated_at': rel.updated_at,
+        }), 200
