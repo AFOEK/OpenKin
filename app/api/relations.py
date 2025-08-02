@@ -106,3 +106,58 @@ def get_relationship(rel_id):
             'updated_by_user_id': rel.updated_by_user_id,
             'updated_at': rel.updated_at,
         }), 200
+    
+
+@relations_bp.route('/<rel_id>', methods=['DELETE'])
+@jwt_required
+def delete_relationship(rel_id):
+    current_user_id = get_jwt_identity()
+    relationship = Relationship.query.get(rel_id)
+    if not relationship:
+        return jsonify({
+            'message':'Relationship not found'
+        }), 404
+    
+    if relationship.created_by_user_id != current_user_id:
+        return jsonify({
+            'message':'Forbidden'
+        }), 403
+    
+    db.session.delete(relationship)
+    db.session.commit()
+    return jsonify({
+        'message':'Relationship deleted'
+    }), 200
+
+@relations_bp.route('/<rel_id>', methods=['PATCH'])
+@jwt_required()
+def update_relationship(rel_id):
+    current_user_id = get_jwt_identity()
+    relationship = Relationship.query.get(rel_id)
+    if not relationship:
+        return jsonify({
+            'message':'Relationship not found'
+        }), 404
+    
+    if relationship.created_by_user_id != current_user_id:
+        return jsonify({
+            'message':'Forbidden'
+        }), 403
+    
+    data = request.json
+    if 'relationship_type' in data:
+        relationship.relatioship_type = data['relationship_type']
+
+    if 'notes' in data:
+        relationship.notes = data['notes']
+
+    if 'confidence' in data:
+        relationship.confidence = data['confidence']
+
+    if 'visibility' in data:
+        relationship.visibility = data['visibility']
+
+    db.session.commit()
+    return jsonify({
+        'message':'Relationship updated'
+    }), 200

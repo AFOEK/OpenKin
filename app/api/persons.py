@@ -24,7 +24,7 @@ def create_person():
         sensitivity_tags = data.get('sensitivity_tags'),
         profile_photo_url = data.get('profile_photo_url'),
         note = data.get('note'),
-        visibility = data.get('visibility').
+        visibility = data.get('visibility'),
         create_by_user_id = current_user_id                        
     )
     db.session.add(person)
