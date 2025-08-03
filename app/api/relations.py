@@ -5,15 +5,10 @@ from app.models import db, Relationship, Persons
 relations_bp = Blueprint('relations_bp', __name__)
 
 @relations_bp.route('/', methods=['POST'])
-@jwt_required
+@jwt_required()
 def create_relationship():
     current_user_id = get_jwt_identity()
     data = request.json
-
-    if current_user_id != data['created_by_user_id']:
-        return jsonify({
-            'message':'Invalid user'
-        }), 403
 
     from_id = data['from_person_id']
     to_id = data['to_person_id']
@@ -68,8 +63,7 @@ def create_relationship():
         end_date = data.get('end_date'),
         verified = data.get('verified'),
         notes = data.get('notes'),
-        create_by_user_id = current_user_id,
-        update_by_user_id = current_user_id
+        created_by_user_id = current_user_id
     )
     db.session.add(relationship)
     db.session.commit()
@@ -79,7 +73,7 @@ def create_relationship():
     }), 201
 
 @relations_bp.route('/<rel_id>', methods=['GET'])
-@jwt_required
+@jwt_required()
 def get_relationship(rel_id):
     current_user_id = get_jwt_identity()
     rel = Relationship.query.get_or_404(rel_id)
@@ -109,7 +103,7 @@ def get_relationship(rel_id):
     
 
 @relations_bp.route('/<rel_id>', methods=['DELETE'])
-@jwt_required
+@jwt_required()
 def delete_relationship(rel_id):
     current_user_id = get_jwt_identity()
     relationship = Relationship.query.get(rel_id)

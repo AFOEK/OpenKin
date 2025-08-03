@@ -5,7 +5,7 @@ from .config import Config
 
 def App():
     app = Flask(__name__)
-    app.config.from_object('Config')
+    app.config.from_object(Config)
     db.init_app(app)
     JWTManager(app)
 

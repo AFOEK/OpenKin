@@ -4,21 +4,37 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 persons_bp = Blueprint('persons_bp', __name__)
 
-@persons_bp.route('/', method=['POST'])
-@jwt_required
+@persons_bp.route('/', methods=['POST'])
+@jwt_required()
 def create_person():
     data = request.json
     current_user_id = get_jwt_identity()
-    if current_user_id != data['create_by_user_id']:
+
+    print(f"Checking for duplicate with values: {data.get('chinese_name')}, {data.get('latin_name')}, {data.get('dob')}, {data.get('pob')}, {data.get('dialect')}")
+
+    duplicate = Persons.query.filter_by(
+        chinese_name = data.get('chinese_name'),
+        latin_name = data.get('latin_name'),
+        pob = data.get('pob'),
+        dialect = data.get('dialect')
+    ).first()
+
+    print(duplicate)
+
+    if duplicate:
         return jsonify({
-            'message':'Invalid user'
-        }), 403
+            'message':'Person already exists',
+            'id': str(duplicate.id)
+        }), 409
+
     person = Persons(
         chinese_name = data.get('chinese_name'),
         latin_name = data.get('latin_name'),
         gender = data.get('gender'),
         dob = data.get('dob'),
         dod = data.get('dod'),
+        pob = data.get('pob'),
+        pod = data.get('pod'),
         dialect = data.get('dialect'),
         is_adopted = data.get('is_adopted'),
         sensitivity_tags = data.get('sensitivity_tags'),
@@ -35,7 +51,7 @@ def create_person():
     }), 201
 
 @persons_bp.route('/<person_id>', methods=['GET'])
-@jwt_required
+@jwt_required()
 def get_person(person_id):
     person = Persons.query.get_or_404(person_id)
     return jsonify({
@@ -60,7 +76,7 @@ def get_person(person_id):
     }), 200
 
 @persons_bp.route('/', methods=['GET'])
-@jwt_required
+@jwt_required()
 def list_persons():
     persons = Persons.query.all()
     return jsonify([{

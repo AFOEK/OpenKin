@@ -16,7 +16,7 @@ def register():
         user = Users(
             email = data.get('email'),
             username = data.get('username'),
-            passsword_hash = hash_password(data.get('password')),
+            password_hash = hash_password(data.get('password')),
             country = data.get('country'),
             verified = False,
             role = 1
@@ -31,21 +31,24 @@ def register():
 @users_bp.route('/login', methods=['POST'])
 def login():
     data = request.json
-    user = Users.query.filter_by(email=data['email']).first()
-    if(user is None):
-        return jsonify({
-            'message':'Invalid Credential',
-        }), 401
-    elif(((data['username'] == user.username) or (data['email'] == user.email)) and check_password(data['password'], user.password_hash)):
+    login_field = data.get('email') or data.get('username')
+    password = data.get('password')
+    
+    if not login_field or not password:
+        return({'message':'Invalid login'}), 400
+    
+    user = Users.query.filter(
+        (Users.email == login_field) | (Users.username == login_field)
+    ).first()
+
+    if user and check_password(user.password_hash, password):
         access_token = create_access_token(identity=str(user.id))
         return jsonify({
-            'access_token':access_token,
-            'user_id':user.id
-        })
+            'access_token': access_token,
+            'user_id': str(user.id)
+        }), 200
     else:
-        return jsonify({
-            'message':'Invalid Credential'
-        }), 401
+        return jsonify({"message":'Invalid credential'}), 401
 
 @users_bp.route('/me', methods=['GET'])
 @jwt_required()
