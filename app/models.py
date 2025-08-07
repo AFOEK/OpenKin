@@ -46,7 +46,7 @@ class Persons(db.Model):
 class Relationship(db.Model):
     __tablename__ = 'relationships'
     __table_args__ = (
-        db.UniqueConstraint('from_person_id', 'to_person_id', name='unique_relationships'),
+        db.UniqueConstraint('from_person_id', 'to_person_id', 'relationship_type', name='unique_relationships'),
         {'schema': 'CoreDB'}
         )
     id = db.Column(UUID(as_uuid=True), primary_key=True, server_default=text("uuid_generate_v4()"))

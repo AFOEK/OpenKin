@@ -43,8 +43,10 @@ def login():
 
     if user and check_password(user.password_hash, password):
         access_token = create_access_token(identity=str(user.id))
+        refresh_token = create_access_token(identity=str(user.id))
         return jsonify({
             'access_token': access_token,
+            'refresh_token': refresh_token,
             'user_id': str(user.id)
         }), 200
     else:
@@ -64,3 +66,10 @@ def me():
         'created_at': user.created_at,
         'updated_at': user.updated_at,
     }), 200
+
+@users_bp.route('/refresh', methods = ['POST'])
+@jwt_required(refresh=True)
+def refresh():
+    current_user = get_jwt_identity()
+    new_access_token = create_access_token(identity=current_user)
+    return jsonify(access_token=new_access_token), 200

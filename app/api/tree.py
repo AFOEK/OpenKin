@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify
 from app.models import db, Persons, Relationship, Users
+from sqlalchemy import text
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import date
 
@@ -59,7 +60,7 @@ def can_view_person(current_user, person):
     user_surname  = get_surname({'latin_name': current_user.latin_name, 'chinese_name': current_user.chinese_name})
     return person_surname and user_surname and person_surname == user_surname
 
-@tree_bp.route('/tree/<person_id>', methods=['GET'])
+@tree_bp.route('/<person_id>', methods=['GET'])
 @jwt_required()
 def get_family_tree(person_id):
     current_user_id = get_jwt_identity()
@@ -70,18 +71,18 @@ def get_family_tree(person_id):
             'message':'Root person not found'
         }), 404
     
-    sql = """
+    sql = text("""
     WITH RECURSIVE family_tree AS(
     SELECT p.*, 0 AS generation
     FROM persons p
     WHERE p.id = :person_id
-    UNION
+    UNION ALL
     SELECT p2.*, ft.generation + 1
     FROM family_tree ft
     JOIN relationships r ON r.from_person_id = ft.id
     JOIN persons p2 ON p2.id = r.to_person_id
     WHERE r.visibility IN ('public', 'family', 'private', 'clan')
-    UNION
+    UNION ALL
     SELECT p1.*, ft.generation + 1
     FROM family_tree ft
     JOIN relationships r ON r.to_person_id = ft.id
@@ -89,7 +90,7 @@ def get_family_tree(person_id):
     WHERE r.visibility IN ('public', 'family', 'private', 'clan')
     )
     SELECT * FROM family_tree;
-    """
+    """)
 
     tree_people = db.session.execute(sql, {'person_id':person_id}).fetchall()
 
