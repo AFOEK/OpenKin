@@ -6,3 +6,4 @@ Flask-RESTful
 Flask-Bcrypt
 python-dotenv
 Flask-JWT-Extended
+opencc

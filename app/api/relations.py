@@ -7,7 +7,25 @@ relations_bp = Blueprint('relations_bp', __name__)
 
 @relations_bp.route('/', methods=['POST'])
 @jwt_required()
-def create_relationship():
+def create_relationship() -> tuple[dict, int]:
+    """
+    Relationship creation handler. This endpoint accepts either 2 person_name or person_data,
+    where it will be checked if the person already have existing connection. Before adding the
+    create relationship data, the user must have valid JWT access token and returns successfull
+    message if not or conflict it will returns error message and HTTP.
+
+    Request JSON:
+        - is_adopted (bool)
+        - relationship_type (str)
+        - visibility (str)
+        - start_date (datetime, optional)
+        - end_date (datetime, optional)
+        - verified (str, optional)
+        - notes (str, optional)
+
+    Returns:
+        tuple[dict, int]: JSON-compatible dict with message and a HTTP response
+    """
     current_user_id = get_jwt_identity()
     data = request.json
 
@@ -93,6 +111,7 @@ def create_relationship():
         is_adopted = data.get('is_adopted'),
         start_date = data.get('start_date'),
         end_date = data.get('end_date'),
+        visibility = data.get('visibility'),
         verified = data.get('verified'),
         notes = data.get('notes'),
         created_by_user_id = current_user_id

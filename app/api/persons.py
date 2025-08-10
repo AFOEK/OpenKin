@@ -19,17 +19,27 @@ def create_person():
         dialect = data.get('dialect')
     ).first()
 
-    print(duplicate)
-
     if duplicate:
         return jsonify({
             'message':'Person already exists',
             'id': str(duplicate.id)
         }), 409
+    
+    chinese_name = data.get("chinese_name")
+    latin_name =  data.get("latin_name")
+
+    chinese_name = chinese_name.strip() if chinese_name else None
+    latin_name = latin_name.strip() if latin_name else None
+
+    if not chinese_name and latin_name:
+        chinese_name = latin_name
+
+    if not latin_name and chinese_name:
+        latin_name = chinese_name
 
     person = Persons(
-        chinese_name = data.get('chinese_name'),
-        latin_name = data.get('latin_name'),
+        chinese_name = chinese_name,
+        latin_name = latin_name,
         gender = data.get('gender'),
         dob = data.get('dob'),
         dod = data.get('dod'),
