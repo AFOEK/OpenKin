@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from .models import db
 from .config import Config
@@ -8,6 +9,8 @@ def App():
     app.config.from_object(Config)
     db.init_app(app)
     JWTManager(app)
+
+    CORS(app, resources={r"/api/*": {"origins":"*"}}, supports_credentials=False)
 
     from app.api.users import users_bp
     from app.api.persons import persons_bp
