@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Routes, Route, useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from './auth/AuthContext';
-import RequiredAuth from './auth/RequireAuth';
+import RequiredAuth from './auth/RequiredAuth';
 import api from './api/client';
 import { AppBar, Toolbar, Button, Container, TextField, Typography, Box, Stack, Paper } from '@mui/material';
 
@@ -50,6 +50,7 @@ function NavBar(){
                 <Button color="inherit" component={Link} to="/add-person">Add Person</Button>
                 <Button color="inherit" component={Link} to="/add-relationship">Add Relationship</Button>
                 <Box sx={{ flex:1 }} />
+                <Button color="inherit" onClick={onToggleTheme}>{mode === 'light' ? 'Dark':'Light'}</Button>
                 <Typography>{user?.username || user?.email}</Typography>
                 <Button color="inherit" onClick={logout}>Logout</Button>
             </Toolbar>
@@ -186,17 +187,17 @@ function AddRelationship() {
   )
 }
 
-export default function App() {
+export default function App({colorMode, toggleColorMode}) {
   const { user } = useAuth()
   return (
     <>
-      {user && <NavBar />}
+      {user && <NavBar onToggleTheme={toggleColorMode} mode={colorMode}/>}
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/" element={<RequireAuth><Dashboard /></RequireAuth>} />
-        <Route path="/tree/:personId" element={<RequireAuth><TreeViewer /></RequireAuth>} />
-        <Route path="/add-person" element={<RequireAuth><AddPerson /></RequireAuth>} />
-        <Route path="/add-relationship" element={<RequireAuth><AddRelationship /></RequireAuth>} />
+        <Route path="/" element={<RequiredAuth><Dashboard /></RequiredAuth>} />
+        <Route path="/tree/:personId" element={<RequiredAuth><TreeViewer /></RequiredAuth>} />
+        <Route path="/add-person" element={<RequiredAuth><AddPerson /></RequiredAuth>} />
+        <Route path="/add-relationship" element={<RequiredAuth><AddRelationship /></RequiredAuth>} />
       </Routes>
     </>
   )
