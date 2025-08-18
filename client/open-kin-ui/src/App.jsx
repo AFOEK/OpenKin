@@ -193,11 +193,11 @@ export default function App({colorMode, toggleColorMode}) {
     <>
       {user && <NavBar onToggleTheme={toggleColorMode} mode={colorMode}/>}
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/" element={<RequiredAuth><Dashboard /></RequiredAuth>} />
-        <Route path="/tree/:personId" element={<RequiredAuth><TreeViewer /></RequiredAuth>} />
-        <Route path="/add-person" element={<RequiredAuth><AddPerson /></RequiredAuth>} />
-        <Route path="/add-relationship" element={<RequiredAuth><AddRelationship /></RequiredAuth>} />
+        <Route path="login" element={<LoginPage />} />
+        <Route index element={<RequiredAuth><Dashboard /></RequiredAuth>} />
+        <Route path="tree/:personId" element={<RequiredAuth><TreeViewer /></RequiredAuth>} />
+        <Route path="add-person" element={<RequiredAuth><AddPerson /></RequiredAuth>} />
+        <Route path="add-relationship" element={<RequiredAuth><AddRelationship /></RequiredAuth>} />
       </Routes>
     </>
   )

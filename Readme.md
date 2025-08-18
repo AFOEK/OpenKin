@@ -46,6 +46,10 @@ OpenKin is motivated by this history. It exists to provide tools for recording a
    - Strong privacy controls for sensitive data.
    - Reinforce that continuity and heritage endure beyond politics.
 
+## Usage
+
+## Contribute
+
 ## References
 <a id="1">[1]</a>
 D. Chirot and A. Reid, Eds., Essential Outsiders: Chinese and Jews in the Modern Transformation of Southeast Asia and Central Europe. Seattle: Univ. of Washington Press, 1997.   

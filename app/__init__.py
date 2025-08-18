@@ -1,11 +1,16 @@
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from pathlib import Path
 from .models import db
 from .config import Config
 
 def App():
-    app = Flask(__name__)
+    app = Flask(
+        __name__,
+        static_folder="../client/open-kin-ui/dist",
+        static_url_path="/"
+    )
     app.config.from_object(Config)
     db.init_app(app)
     JWTManager(app)
@@ -21,5 +26,17 @@ def App():
     app.register_blueprint(persons_bp, url_prefix='/api/persons')
     app.register_blueprint(relations_bp, url_prefix='/api/relationships')
     app.register_blueprint(tree_bp, url_prefix='/api/tree')
+
+    dist = Path(app.static_folder)
+
+    @app.router("/")
+    @app.router("/app/")
+    @app.router("/app/<path:path>")
+    def SPA(path=None):
+        return send_from_directory(dist, "index.html")
+    
+    @app.route("/assets/<path:filename>")
+    def assets(filename):
+        return send_from_directory(dist / "assets", filename)
 
     return app
