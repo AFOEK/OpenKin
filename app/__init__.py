@@ -29,9 +29,9 @@ def App():
 
     dist = Path(app.static_folder)
 
-    @app.router("/")
-    @app.router("/app/")
-    @app.router("/app/<path:path>")
+    @app.route("/")
+    @app.route("/app/")
+    @app.route("/app/<path:path>")
     def SPA(path=None):
         return send_from_directory(dist, "index.html")
     
