@@ -16,7 +16,7 @@ export function setTokens({access, refresh}){
     }
 }
 
-export function clearToken(){
+export function clearTokens(){
     accessToken = null;
     refreshToken = null;
     localStorage.removeItem('access_token');
@@ -54,7 +54,7 @@ api.interceptors.response.use(
             } catch (e){
                 queue.forEach(p => p.reject(e));
                 queue = [];
-                clearToken();
+                clearTokens();
                 window.location.href = '/login';
                 return Promise.reject(e);
             } finally {

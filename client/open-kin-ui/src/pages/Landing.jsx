@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { AppBar, Toolbar, Button, Container, Box, Typography, Paper } from '@mui/material';
 import App from '../App';
+import GoalsSection from "../components/GoalsSections";
 
 const Section = ({id, title, subtitle, children}) => (
     <Box id={id}
@@ -29,6 +30,7 @@ export default function Landing(){
                 <Typography variant='h6' sx={{ flexGrow: 1 }}>OpenKin</Typography>
                 <Button href='#feature' sx={{ mr: 1}}>Features</Button>
                 <Button href='#privacy' sx={{mr: 1}}>Privacy</Button>
+                <Button href='#goals' sx={{mr: 1}}>Goals</Button>
                 {/* <Button href='#statistic' sx={{mr: 1}}>Statistic</Button> */}
                 <Button href='#cta' variant='contained'>Get Started</Button>
             </Toolbar>
@@ -73,9 +75,11 @@ export default function Landing(){
             <Section id="privacy" title="Built with Privacy in Mind">
                 <Typography sx={{maxWidth: 760, mx:"auto"}}>
                     Role-based access, per-record visibility, and export controls give you confidence
-                    that sebsitive history stays within your circle.
+                    that sensitive history stays within your circle.
                 </Typography>
             </Section>
+
+            <GoalsSection />
 
             {/* <StatsSection /> */}
             <Section id="cta" title="Ready to Start ?">

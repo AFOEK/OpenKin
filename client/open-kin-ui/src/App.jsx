@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Routes, Route, useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from './auth/AuthContext';
-import RequiredAuth from './auth/RequiredAuth';
+import RequireAuth from './auth/RequireAuth';
 import api from './api/client';
 import { AppBar, Toolbar, Button, Container, TextField, Typography, Box, Stack, Paper } from '@mui/material';
 
@@ -194,10 +194,10 @@ export default function App({colorMode, toggleColorMode}) {
       {user && <NavBar onToggleTheme={toggleColorMode} mode={colorMode}/>}
       <Routes>
         <Route path="login" element={<LoginPage />} />
-        <Route index element={<RequiredAuth><Dashboard /></RequiredAuth>} />
-        <Route path="tree/:personId" element={<RequiredAuth><TreeViewer /></RequiredAuth>} />
-        <Route path="add-person" element={<RequiredAuth><AddPerson /></RequiredAuth>} />
-        <Route path="add-relationship" element={<RequiredAuth><AddRelationship /></RequiredAuth>} />
+        <Route index element={<RequireAuth><Dashboard /></RequireAuth>} />
+        <Route path="tree/:personId" element={<RequireAuth><TreeViewer /></RequireAuth>} />
+        <Route path="add-person" element={<RequireAuth><AddPerson /></RequireAuth>} />
+        <Route path="add-relationship" element={<RequireAuth><AddRelationship /></RequireAuth>} />
       </Routes>
     </>
   )
