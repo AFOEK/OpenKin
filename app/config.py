@@ -11,5 +11,3 @@ class Config:
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=30)
     JWT_REFRESH_TOKEN_EXPIRES =  timedelta(hours=2)
-
-print("Loaded DB URI:", Config.SQLALCHEMY_DATABASE_URI)

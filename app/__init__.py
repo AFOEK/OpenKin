@@ -21,11 +21,13 @@ def App():
     from app.api.persons import persons_bp
     from app.api.relations import relations_bp
     from app.api.tree import tree_bp
+    from app.api.public import public_bp
 
     app.register_blueprint(users_bp, url_prefix='/api/users')
     app.register_blueprint(persons_bp, url_prefix='/api/persons')
     app.register_blueprint(relations_bp, url_prefix='/api/relationships')
     app.register_blueprint(tree_bp, url_prefix='/api/tree')
+    app.register_blueprint(public_bp, url_prefix='/api/public')
 
     dist = Path(app.static_folder)
 

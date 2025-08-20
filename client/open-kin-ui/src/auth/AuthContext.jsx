@@ -6,21 +6,18 @@ export const useAuth = () => useContext(AuthCtx);
 
 export default function AuthProvider({ children }){
     const [user, setUser] = useState(null);
+    const [ready, setReady] = useState(false);
 
     async function login( {login, password} ) {
-        const {data} = await api.post('/users.login', {email: login, username: login, password});
-        localStorage.setItem('access_token', data.access_token);
-        localStorage.setItem('refresh_token', data.refresh_token);
+        const { data } = await api.post('/users/login', {email: login, username: login, password});
+        setTokens({ access: data.access_token, refresh:data.refresh_token })
 
-        const me = await api.get('/users/me', {
-            headers: {Authorization: `Bearer $(data.access_token)`}
-        });
+        const me = await api.get('/users/me');
         setUser(me.data);
     }
 
     function logout(){
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
+        clearTokens();
         setUser(null);
         window.location.href = '/login';
     }
@@ -30,16 +27,18 @@ export default function AuthProvider({ children }){
             const token = localStorage.getItem('access_token');
             if(!token) return;
             try{
-                const me = await api.get('/users/me', {headers: {Authorization: `Bearer ${token}`}});
+                const me = await api.get('/users/me');
                 setUser(me.data);
             }catch {
 
+            } finally{
+                setReady(true);
             }
         })();
     }, []);
 
     return(
-        <AuthCtx.Provider value={{user, login, logout}}>
+        <AuthCtx.Provider value={{user, ready, login, logout}}>
             {children}
         </AuthCtx.Provider>
     );

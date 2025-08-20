@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from app.models import db, Users
 from datetime import datetime
 from app.utils.auth import hash_password, check_password
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, create_refresh_token,jwt_required, get_jwt_identity
 
 users_bp = Blueprint('users_bp', __name__)
 
@@ -56,7 +56,7 @@ def login() -> tuple[dict, int]:
         tuple[dict, int]: JSON-compatible dict with JWT tokens or error message,
         and an HTTP status code
     """
-    data = request.json
+    data = request.get_json(force=True)
     login_field = data.get('email') or data.get('username')
     password = data.get('password')
     
@@ -69,7 +69,7 @@ def login() -> tuple[dict, int]:
 
     if user and check_password(user.password_hash, password):
         access_token = create_access_token(identity=str(user.id))
-        refresh_token = create_access_token(identity=str(user.id))
+        refresh_token = create_refresh_token(identity=str(user.id))
         return jsonify({
             'access_token': access_token,
             'refresh_token': refresh_token,
@@ -98,8 +98,8 @@ def me() -> tuple[dict, int]:
         'username': user.username,
         'country': user.country,
         'role': user.role,
-        'created_at': user.created_at.isoformat() if user.create_at else None,
-        'updated_at': user.updated_at.isoformat() if user.update_at else None
+        'created_at': user.created_at.isoformat() if user.created_at else None,
+        'updated_at': user.updated_at.isoformat() if user.updated_at else None
     }), 200
 
 @users_bp.route('/refresh', methods = ['POST'])

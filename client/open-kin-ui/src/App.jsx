@@ -3,13 +3,15 @@ import { Routes, Route, useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from './auth/AuthContext';
 import RequireAuth from './auth/RequireAuth';
 import api from './api/client';
-import { AppBar, Toolbar, Button, Container, TextField, Typography, Box, Stack, Paper } from '@mui/material';
+import { AppBar, Toolbar, Button, Container, TextField, Typography, Box, Stack, Paper, InputAdornment, IconButton, Autocomplete, CircularProgress } from '@mui/material';
+import { ArrowBackIosNew, Visibility, VisibilityOff } from "@mui/icons-material";
 
 function LoginPage(){
-    const {login} = useAuth()
-    const [loginField, setloginField] = useState('')
-    const [password, setPassword] = useState('')
-    const [err, setErr] = useState('')
+    const {login} = useAuth();
+    const [loginField, setloginField] = useState('');
+    const [password, setPassword] = useState('');
+    const [err, setErr] = useState('');
+    const [show, setShow] = useState(false);
     const nav = useNavigate()
 
     async function onSubmit(e){
@@ -17,7 +19,7 @@ function LoginPage(){
         setErr('')
         try{
             await login({ login: loginField, password })
-            nav('/')
+            nav('/app')
         } catch (e){
             setErr('Invalid Credential !')
         }
@@ -26,13 +28,31 @@ function LoginPage(){
     return (
         <Container maxWidth="xs" sx={{ mt:8 }}>
             <Paper sx = {{ p: 3 }}>
-                <Typography variant="h5" gutterBottom>Sign in</Typography>
+                <Box sx={{display:'flex', alignItems:"center", justifyContent:"space-between", mb: 2}}>
+                    <Typography variant="h5" gutterBottom>Sign in</Typography>
+                    <Button variant="outlined" color="secondary" onClick={() => nav('/')} sx={{mb:2, alignSelf:'flex-start'}}>Back{<ArrowBackIosNew fontSize="small"/>}</Button>
+                </Box>
                 <Box component="form" onSubmit={onSubmit}>
                     <Stack spacing={2}>
-                        <TextField label="Email or username" value={loginField} onChange={e=>setloginField(e.target.value)} placeholder="Username" fullWidth autoFocus />
-                        <TextField label="Password" type="password" value={password} onChange={e=>setPassword(e.target.value)} fullWidth placeholder="Password" />
+                        <TextField label="Email or username" value={loginField} placeholder="Username" fullWidth autoFocus onChange={e=>setloginField(e.target.value)} />
+                        <TextField label="Password" type={show ? 'text' : 'password'} value={password} fullWidth placeholder="Password" onChange={e=>setPassword(e.target.value)} 
+                            slotProps={{
+                                input:{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton onClick={() => setShow(!show)} edge="end">
+                                                {show ? <VisibilityOff /> : <Visibility/>}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    )
+                                }
+                            }}
+                            />
                         {err && <Typography color="error">{err}</Typography>}
-                        <Button variant="contained" type="submit">Login</Button>
+                        <Box sx={{display: 'flex', gap: 2, mt: 2}}>
+                            <Button variant="contained" fullWidth type="submit">Login</Button>
+                            <Button variant="outlined" onClick={() => nav('/register')}>Register</Button>
+                        </Box>
                     </Stack>
                 </Box>
             </Paper>
@@ -40,7 +60,152 @@ function LoginPage(){
     )
 }
 
-function NavBar(){
+function RegisterPage(){
+    const nav = useNavigate()
+    const [form, setForm] = useState({
+        username: "",
+        email: "",
+        password: "",
+        confirm: "",
+        country: ""
+    })
+
+    const [show1, setShow1] = useState(false)
+    const [show2, setShow2] = useState(false)
+    const [err, setErr] = useState('')
+    const [ok, setOk] = useState('')
+    const [countries, setCountries] = useState([])
+    const [loading, setLoading] = useState(false)
+
+    useEffect(() => {
+        let cancelled = false
+        setLoading(true)
+        api.get('public/contries').then(({data})=> {if (!cancelled) setCountries(data)})
+            .catch(()=> {if (!cancelled) setCountries([])})
+            .finally(()=>{if (!cancelled) setLoading(false)})
+        return ()=>{cancelled=true}
+    }, [])
+
+    async function onSubmit(e) {
+        e.preventDefault()
+        setErr('');
+        setOk('')
+
+        if(!form.username || !form.email || !form.password || !form.country){
+            setErr('Please fill all required fields');
+            return
+        }
+        if(!/^\S+@\S+\.\S+$/.test(form.email)){
+            setErr("Please enter a valid email");
+            return
+        }
+        if(form.password.length < 8){
+            setErr("Password must be at least 8 character");
+            return
+        }
+        if(form.password !== form.confirm){
+            setErr("Passwords do not match");
+            return
+        }
+
+        try{
+            await api.post('/users/register',{
+                email: form.email,
+                username: form.username,
+                password: form.password,
+                country: form.country
+            })
+            setOk('Account created. You can sign in now.')
+            setTimeout(()=> nav('/login'), 650)
+        } catch(e){
+            setErr(e.response?.data?.message || 'Registration failed !')
+        }
+    }
+
+    return(
+        <Container maxWidth="xs" sx={{ mt:8 }}>
+            <Paper sx={{ p:3 }}>
+                <Box sx={{display:'flex', alignItems:'center', justifyContent:'space-between', mb:2}}>
+                    <Typography variant="h5">Create account</Typography>
+                    <Button variant="outlined" color="secondary" size="small" onClick={()=>nav('/login')}>
+                        Back to login
+                    </Button>
+                </Box>
+
+                <Box component="form" onSubmit={onSubmit}>
+                    <Stack spacing={2}>
+                        <TextField
+                        label="Username"
+                        value={form.username}
+                        onChange={e=>setForm({...form, username:e.target.value})}
+                        placeholder="XxUsernamexX"
+                        fullWidth
+                        required
+                        />
+                        <TextField
+                        label="Email"
+                        type="email"
+                        value={form.email}
+                        onChange={e=>setForm({...form, email:e.target.value})}
+                        placeholder="email@example.com"
+                        fullWidth
+                        required
+                        />
+
+                        {/* <Autocomplete/> */}
+
+                        <TextField
+                        label="Password"
+                        type={show1 ? 'text':'password'}
+                        value={form.password}
+                        onChange={e=>setForm({...form, password:e.target.value})}
+                        fullWidth
+                        required
+                        slotProps={{
+                            input:{
+                                endAdornment:(
+                                    <InputAdornment position="end">
+                                        <IconButton onClick={()=>setShow1(!show1)} edge="end">
+                                            {show1 ? <VisibilityOff/> : <Visibility/>}
+                                        </IconButton>
+                                    </InputAdornment>
+                                )
+                            }
+                        }}
+                        />
+                        <TextField
+                        label="Confirm Password"
+                        type={show2 ? 'text':'password'}
+                        value={form.confirm}
+                        onChange={e=>setForm({...form, confirm:e.target.value})}
+                        fullWidth
+                        required
+                        slotProps={{
+                            input:{
+                                endAdornment:(
+                                    <InputAdornment position="end">
+                                        <IconButton onClick={()=>setShow2(!show2)} edge="end">
+                                            {show2 ? <VisibilityOff/> : <Visibility/>}
+                                        </IconButton>
+                                    </InputAdornment>                                   
+                                )
+                            }
+                        }}
+                        />
+                        {err && <Typography color="error">{err}</Typography>}
+                        {ok && <Typography color="sucess.main">{ok}</Typography>}
+                        <Box sx={{display:'flex', gap:2, mt:1}}>
+                            <Button variant="outlined" fullWidth onClick={()=>nav('/login')}>I have an account</Button>
+                            <Button variant="contained" type="submit">Register</Button>
+                        </Box>
+                    </Stack>
+                </Box>
+            </Paper>
+        </Container>
+    )
+}
+
+function NavBar({mode, onToggleTheme}){
     const { user, logout } = useAuth()
     return (
         <AppBar position="static">
@@ -76,12 +241,10 @@ function TreeViewer(){
     const [rows, setRows] = useState([])
 
     async function load(){
-        const res = await api.get(`/tree/tree/${personId}`, {
-            headers: {Authorization: `Bearer ${token}`}
-        })
+        const res = await api.get(`/tree/tree/${personId}`)
         setRows(res.data)
     }
-    useState(() => {load() }, [])
+    useEffect(() => {load() }, [])
 
     return(
         <Container>
@@ -188,12 +351,13 @@ function AddRelationship() {
 }
 
 export default function App({colorMode, toggleColorMode}) {
-  const { user } = useAuth()
+  const { user, ready } = useAuth()
   return (
     <>
-      {user && <NavBar onToggleTheme={toggleColorMode} mode={colorMode}/>}
+      {ready && user && <NavBar onToggleTheme={toggleColorMode} mode={colorMode}/>}
       <Routes>
         <Route path="login" element={<LoginPage />} />
+        <Route path="register" element={<RegisterPage/>} />
         <Route index element={<RequireAuth><Dashboard /></RequireAuth>} />
         <Route path="tree/:personId" element={<RequireAuth><TreeViewer /></RequireAuth>} />
         <Route path="add-person" element={<RequireAuth><AddPerson /></RequireAuth>} />

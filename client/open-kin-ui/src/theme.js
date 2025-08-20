@@ -8,11 +8,11 @@ const common = {
         h2: { fontWeight: 700, letterSpacing: -0.4 },
         h3: { fontWeight: 700, letterSpacing: -0.3 },
     },
-    component:{
+    components:{
         MuiPaper:{
             styleOverrides:{
                 rounded: {borderRadius: 14},
-                elevation1: {boxShadow: "0px 6px 20px rbga(0,0,0,0.06)"}
+                elevation1: {boxShadow: "0px 6px 20px rgba(0,0,0,0.06)"}
             }
         },
         MuiButton:{
@@ -22,11 +22,14 @@ const common = {
             }
         },
         MuiAppBar:{
+            defaultProps: { elevation: 0, color: "transparent" },
             styleOverrides:{
-                root:{
+                root:({theme}) => ({
                     backdropFilter: "saturate(120%) blur(6px)",
-                    background: "transparent"
-                }
+                    backgroundColor: "transparent",
+                    color: theme.palette.text.primary,
+                    borderBottom: `1px solid ${theme.palette.divider}`
+                })
             }
         }
     }

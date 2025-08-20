@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { ThemeProvider, CssBaseline, IconButton, Box } from '@mui/material';
 import { Sun, Moon } from "lucide-react";
 import { makeTheme } from "./theme";
@@ -19,6 +19,7 @@ function Root(){
 
     const router = createBrowserRouter([
         {path: '/', element: <Landing />},
+        {path: '/login/', element: <Navigate to="/app/login" replace />},
         {path: '/app/*', element: <App colorMode={mode} toggleColorMode={toggle}/>}
     ])
 

@@ -1,9 +1,11 @@
 import axios from 'axios';
 
-const api = axios.create({baseURL: import.meta.env.VITE_API_BASE});
+const api = axios.create({baseURL: import.meta.env.VITE_API_BASE || "/api"});
 
-let accessToken = localStorage.getItem('access_token')
-let refreshToken = localStorage.getItem('refresh_token')
+let accessToken = localStorage.getItem('access_token');
+let refreshToken = localStorage.getItem('refresh_token');
+let refreshing = false;
+let queue = [];
 
 export function setTokens({access, refresh}){
     if (access){
@@ -26,15 +28,16 @@ export function clearTokens(){
 api.interceptors.request.use((config) => {
     if (accessToken){
         config.headers.Authorization = `Bearer ${accessToken}`;
-        return config;
     }
+    return config;
 });
 
 api.interceptors.response.use(
     r => r,
     async(error) => {
         const original = error.config;
-        if(error.response?.status === 401 && !original._retry && refreshToken){
+        const status = error.response?.status;
+        if(status === 401 && !original._retry && refreshToken){
             if (refreshing){
                 return new Promise((resolve, reject) => queue.push({resolve, reject}));
             }
@@ -43,7 +46,7 @@ api.interceptors.response.use(
 
             try{
                 const res = await axios.post(
-                    `${import.meta.env.VITE_API_BASE/users/refresh}`,
+                    `${api.defaults.baseURL}/users/refresh`,
                     {},
                     {headers: {Authorization: `Bearer ${refreshToken}`}}
                 );
@@ -58,9 +61,10 @@ api.interceptors.response.use(
                 window.location.href = '/login';
                 return Promise.reject(e);
             } finally {
-                refreshing = false
+                refreshing = false;
             }
         }
+        return Promise.reject(error);
     }
 );
 
